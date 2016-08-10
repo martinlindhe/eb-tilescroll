@@ -30,13 +30,13 @@ const (
 )
 
 var (
-	thePlayer            = &player{}
-	gophersImage         *ebiten.Image
-	repeatedGophersImage *ebiten.Image
-	groundImage          *ebiten.Image
+	theViewport     = &viewport{}
+	bgImage         *ebiten.Image
+	repeatedBgImage *ebiten.Image
+	groundImage     *ebiten.Image
 )
 
-type player struct {
+type viewport struct {
 	x16 int
 	y16 int
 }
@@ -45,9 +45,9 @@ func round(x float64) float64 {
 	return math.Floor(x + 0.5)
 }
 
-func (p *player) MoveForward() {
+func (p *viewport) Move() {
 
-	w, h := gophersImage.Size()
+	w, h := bgImage.Size()
 	mx := w * 16
 	my := h * 16
 	s, c := math.Sincos(2 * math.Pi)
@@ -67,7 +67,7 @@ func (p *player) MoveForward() {
 	}
 }
 
-func (p *player) Position() (int, int) {
+func (p *viewport) Position() (int, int) {
 	return p.x16, p.y16
 }
 
@@ -77,10 +77,10 @@ func updateGroundImage(ground *ebiten.Image) error {
 		return err
 	}
 
-	x16, y16 := thePlayer.Position()
+	x16, y16 := theViewport.Position()
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(-x16)/16, float64(-y16)/16)
-	if err := ground.DrawImage(repeatedGophersImage, op); err != nil {
+	if err := ground.DrawImage(repeatedBgImage, op); err != nil {
 		return err
 	}
 	return nil
@@ -97,7 +97,7 @@ func drawGroundImage(screen *ebiten.Image, ground *ebiten.Image) error {
 
 func update(screen *ebiten.Image) error {
 
-	thePlayer.MoveForward()
+	theViewport.Move()
 
 	if err := updateGroundImage(groundImage); err != nil {
 		return err
@@ -116,13 +116,13 @@ func update(screen *ebiten.Image) error {
 func main() {
 
 	var err error
-	gophersImage, _, err = ebitenutil.NewImageFromFile("desert.png", ebiten.FilterNearest)
+	bgImage, _, err = ebitenutil.NewImageFromFile("desert.png", ebiten.FilterNearest)
 	if err != nil {
 		log.Fatal(err)
 	}
-	w, h := gophersImage.Size()
+	w, h := bgImage.Size()
 	const repeat = 5
-	repeatedGophersImage, err = ebiten.NewImage(w*repeat, h*repeat, ebiten.FilterNearest)
+	repeatedBgImage, err = ebiten.NewImage(w*repeat, h*repeat, ebiten.FilterNearest)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -130,7 +130,7 @@ func main() {
 		for i := 0; i < repeat; i++ {
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Translate(float64(w*i), float64(h*j))
-			if err := repeatedGophersImage.DrawImage(gophersImage, op); err != nil {
+			if err := repeatedBgImage.DrawImage(bgImage, op); err != nil {
 				log.Fatal(err)
 			}
 		}
