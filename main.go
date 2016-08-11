@@ -50,9 +50,10 @@ func (p *viewport) Move() {
 	w, h := bgImage.Size()
 	mx := w * 16
 	my := h * 16
-	s, c := math.Sincos(2 * math.Pi)
-	p.x16 += int(round(16*c) * 2)
-	p.y16 += int(round(16*s)*2) + screenHeight/8
+
+	p.x16 += w / 32
+	p.y16 += h / 32
+
 	for mx <= p.x16 {
 		p.x16 -= mx
 	}
